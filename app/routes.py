@@ -1,6 +1,22 @@
-from flask import Blueprint, jsonify, abort, make_response
+from flask import Blueprint, jsonify, make_response, request
+from app import db
+from app.models.book import Book
 
 books_bp = Blueprint("books", __name__, url_prefix="/books")
+
+@books_bp.route("", methods = ["POST"])
+def handle_books():
+    request_body = request.get_json()
+    if "title" not in request_body or "description" not in request_body:
+        return make_response("Invalid Request",400)
+
+    new_book = Book(title=request_body["title"],
+                    description=request_body["description"])
+    db.session.add(new_book)
+    db.session.commit()
+    
+    return make_response(f"Book {new_book.title} successfully created",201)
+
 
 # def validate_book(book_id):
 #     try:
